@@ -198,8 +198,8 @@
         "{{user `custom_script`}}",
         "script/minimize.sh",
         "script/cleanup.sh",
-        "script/custom/installdocker.sh",
-        "script/custom/installjava.sh"
+        "script/custom/installjava.sh",
+        "script/custom/installdocker.sh"
       ],
       "type": "shell",
       "expect_disconnect": "true"
