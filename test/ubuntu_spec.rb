@@ -14,4 +14,8 @@ describe 'box' do
     expect(file('/etc/update-manager/release-upgrades').content)
       .to match(/Prompt=never/)
   end
+
+  it 'should have a .gradle cache' do
+    expect(file('/home/vagrant/.gradle')).to be_directory
+  end
 end

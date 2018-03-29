@@ -1,5 +1,15 @@
 # Packer templates for Ubuntu
 
+### Forked from boxcutter/ubuntu
+
+`./mybuild.sh build` custom build script to prepopulate arguments
+
+`./mybuild.sh test` custom test script to test box locally
+make sure you delete old boxes from box/virtualbox, it tests each one
+
+`.bin/bump.sh (patch|minor|major)` bump the version for changes
+
+
 ### Overview
 
 This repository contains [Packer](https://packer.io/) templates for creating Ubuntu Vagrant boxes.
