@@ -44,7 +44,7 @@ publish() {
 #		bin/test-box "$@"
 		version=$(cat VERSION)
 		box=$(basename ${f})
-		read -r boxname suffix <<<$(echo $box | sed 's/\(.*\)\(-[0-9]\.[0-9]\.[0-9]\)\.box$/\1 \2/')
+		read -r boxname suffix <<<$(echo $box | sed 's/\(.*\)\(-[0-9]\.[0-9]\.[0-9]\.box\)$/\1 \2/')
 		echo "$boxname $suffix $version"
 		bin/register-vagrant-cloud.sh $boxname $suffix $version
 	done
