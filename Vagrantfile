@@ -9,9 +9,9 @@
 
 Vagrant.configure("2") do |config|
   config.vm.define :jaasslavehost, primary: true do |jaasslavehost|
-    jaasslavehost.vm.box = "kaltepeter/jaasslavehost"
+    jaasslavehost.vm.box = "kaltepeter/ubuntu1604"
     jaasslavehost.vm.box_version = "1.0.7"
-    jaasslavehost.vm.hostname = "jaasslavehost"
+    jaasslavehost.vm.hostname = "kaubuntu1604"
     jaasslavehost.vm.box_check_update = true
 
     # jaasslavehost.vm.network "forwarded_port", guest: 22, host: 2224
@@ -25,8 +25,9 @@ Vagrant.configure("2") do |config|
     #                     run: "always",
     #                     inline: "ifconfig eth0 172.19.0.17 netmask 255.255.255.0 up"
 
-    jaasslavehost.vm.provision "shell", path: "provision.sh", privileged: false
-    jaasslavehost.vm.provision "shell", path: "add_docker_group.sh", privileged: true
+    # uncomment if you need this
+    # jaasslavehost.vm.provision "shell", path: "provision.sh", privileged: false
+    # jaasslavehost.vm.provision "shell", path: "add_docker_group.sh", privileged: true
   end
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
