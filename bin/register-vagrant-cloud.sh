@@ -22,11 +22,11 @@ args() {
         exit 1
     fi
 
-    if [ -z ${ATLAS_USERNAME+x} ]; then
+    if [ -z ${VAGRANT_CLOUD_USERNAME+x} ]; then
         echo "VAGRANT_CLOUD_USERNAME environment variable not set!"
         usage
         exit 1
-    elif [ -z ${ATLAS_ACCESS_TOKEN+x} ]; then
+    elif [ -z ${VAGRANT_CLOUD_ACCESS_TOKEN+x} ]; then
         echo "VAGRANT_CLOUD_ACCESS_TOKEN environment variable not set!"
         usage
         exit 1
@@ -100,7 +100,7 @@ get_short_description() {
     esac
 
     VIRTUALBOX_VERSION=$(VirtualBox --help | head -n 1 | awk '{print $NF}')
-    PARALLELS_VERSION=$(prlctl --version | awk '{print $3}')
+#    PARALLELS_VERSION=$(prlctl --version | awk '{print $3}')
     VMWARE_VERSION=10.0.10
     SHORT_DESCRIPTION="Ubuntu${EDITION_STRING} ${PRETTY_VERSION} (${BIT_STRING})${DOCKER_STRING}"
 }
@@ -154,7 +154,7 @@ create_description() {
     esac
 
     VIRTUALBOX_VERSION=$(VirtualBox --help | head -n 1 | awk '{print $NF}')
-    PARALLELS_VERSION=$(prlctl --version | awk '{print $3}')
+#    PARALLELS_VERSION=$(prlctl --version | awk '{print $3}')
     VMWARE_VERSION=10.0.10
 
     VMWARE_BOX_FILE=box/vmware/${BOX_NAME}${BOX_SUFFIX}
@@ -208,7 +208,7 @@ publish_provider() {
     vagrant_cloud_access_token=$2
 
     echo "==> Checking to see if ${PROVIDER} provider exists"
-    HTTP_STATUS=$(curl -s -f -o /dev/nul -w "%{http_code}" -i "${VAGRANT_CLOUD_URL}/box/${vagrant_cloud_username}/${BOX_NAME}/version/${VERSION}/provider/${PROVIDER}"?access_token="${vagrant_cloud_access_token}" || true)
+    HTTP_STATUS=$(curl -s -f -o /dev/null -w "%{http_code}" -i "${VAGRANT_CLOUD_URL}/box/${vagrant_cloud_username}/${BOX_NAME}/version/${VERSION}/provider/${PROVIDER}"?access_token="${vagrant_cloud_access_token}" || true)
     echo ${HTTP_STATUS}
     if [ 200 -eq ${HTTP_STATUS} ]; then
         echo "==> Updating ${PROVIDER} provider"
@@ -255,21 +255,21 @@ atlas_publish() {
     fi
 
 #    BOXCUTTER_BASE_URL=http://cdn.boxcutter.io/ubuntu
-#    if [[ -e ${VMWARE_BOX_FILE} ]]; then
-#        PROVIDER=vmware_desktop
-#        PROVIDER_URL=${BOXCUTTER_BASE_URL}/vmware${VMWARE_VERSION}/${BOX_NAME}${BOX_SUFFIX}
-#        publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
-#    fi
-#    if [[ -e ${VIRTUALBOX_BOX_FILE} ]]; then
-#        PROVIDER=virtualbox
-#        PROVIDER_URL=${BOXCUTTER_BASE_URL}/virtualbox${VIRTUALBOX_VERSION}/${BOX_NAME}${BOX_SUFFIX}
-#        publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
-#    fi
-#    if [[ -e ${PARALLELS_BOX_FILE} ]]; then
-#        PROVIDER=parallels
-#        PROVIDER_URL=${BOXCUTTER_BASE_URL}/parallels${PARALLELS_VERSION}/${BOX_NAME}${BOX_SUFFIX}
-#        publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
-#    fi
+    if [[ -e ${VMWARE_BOX_FILE} ]]; then
+        PROVIDER=vmware_desktop
+        PROVIDER_URL=${VAGRANT_CLOUD_URL}/vmware${VMWARE_VERSION}/${BOX_NAME}${BOX_SUFFIX}
+        publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
+    fi
+    if [[ -e ${VIRTUALBOX_BOX_FILE} ]]; then
+        PROVIDER=virtualbox
+        PROVIDER_URL=${VAGRANT_CLOUD_URL}/virtualbox${VIRTUALBOX_VERSION}/${BOX_NAME}${BOX_SUFFIX}
+        publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
+    fi
+    if [[ -e ${PARALLELS_BOX_FILE} ]]; then
+        PROVIDER=parallels
+        PROVIDER_URL=${VAGRANT_CLOUD_URL}/parallels${PARALLELS_VERSION}/${BOX_NAME}${BOX_SUFFIX}
+        publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
+    fi
 
     echo
     STATUS=$(echo ${JSON_RESULT} | jq -r .status)
