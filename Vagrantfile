@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
   config.vm.define :kaubuntu1604, primary: true do |jaasslavehost|
     jaasslavehost.vm.box = "kaltepeter/ubuntu1604"
     jaasslavehost.vm.box_version = "1.0.7"
+    # jaasslavehost.vm.box = "box/virtualbox/ubuntu1604-1.0.7.box"
     jaasslavehost.vm.hostname = "kaubuntu1604"
     jaasslavehost.vm.box_check_update = true
 
