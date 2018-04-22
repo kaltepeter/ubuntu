@@ -15,7 +15,21 @@ describe 'box' do
       .to match(/Prompt=never/)
   end
 
-  it 'should have a .gradle cache' do
-    expect(file('/home/vagrant/.gradle')).to be_directory
+  it 'should have a gradle home dir for docker containers' do
+    expect(file('/home/vagrant/gradle')).to be_directory
+    expect(file('/home/vagrant/gradle')).to be_owned_by 'vagrant'
+    expect(file('/home/vagrant/gradle')).to be_owned_by 'be_grouped_into'
+    expect(file('/home/vagrant/gradle')).to be_readable_by 'vagrant'
+    expect(file('/home/vagrant/gradle')).to be_writable_by 'vagrant'
+    expect(file('/home/vagrant/gradle')).to be_executable 'vagrant'
+  end
+
+  it 'should have a node home dir for docker containers' do
+    expect(file('/home/vagrant/node')).to be_directory
+    expect(file('/home/vagrant/node')).to be_owned_by 'vagrant'
+    expect(file('/home/vagrant/node')).to be_owned_by 'be_grouped_into'
+    expect(file('/home/vagrant/node')).to be_readable_by 'vagrant'
+    expect(file('/home/vagrant/node')).to be_writable_by 'vagrant'
+    expect(file('/home/vagrant/node')).to be_executable 'vagrant'
   end
 end
