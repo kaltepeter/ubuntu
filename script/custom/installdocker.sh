@@ -1,5 +1,8 @@
 #!/bin/bash -x -e
 #This script installs the latest vesion of docker ce on ubuntu 16.04
+SSH_USER=${SSH_USERNAME:-vagrant}
+SSH_PASS=${SSH_PASSWORD:-vagrant}
+SSH_USER_HOME=${SSH_USER_HOME:-/home/${SSH_USER}}
 
 #first install dependencies
 sudo apt-get -y update
@@ -24,7 +27,7 @@ sudo apt-get -y install docker-ce
 # configure docker group and user
 # https://askubuntu.com/questions/477551/how-can-i-use-docker-without-sudo
 sudo groupadd docker
-sudo usermod -aG docker vagrant
+sudo usermod -aG docker $SSH_USER
 newgrp - docker
 
 #Docker Benchmark changes
@@ -47,12 +50,12 @@ ExecStart=
 ExecStart=/usr/bin/dockerd -D -H fd:// --icc=false --log-level="info"
 EOL"
 
-mkdir "$HOME/.docker"
-touch "$HOME/.docker/config.json"
-chown -R vagrant: "$HOME/.docker"
+mkdir "$SSH_USER_HOME/.docker"
+touch "$SSH_USER_HOME/.docker/config.json"
+chown -R $SSH_USER "$SSH_USER_HOME/.docker"
 
 # allow jenkins to remote in
-cat << EOL > "$HOME/.docker/config.json"
+cat << EOL > "$SSH_USER_HOME/.docker/config.json"
 {
     "hosts": ["tcp://127.0.0.1:2376", "unix:///var/run/docker.sock"]
 }
