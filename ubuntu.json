@@ -200,7 +200,8 @@
         "script/cleanup.sh",
         "script/custom/installjava.sh",
         "script/custom/installdocker.sh",
-        "script/custom/configure-gradle.sh"
+        "script/custom/configure-gradle.sh",
+        "script/custom/configure-node.sh"
       ],
       "type": "shell",
       "expect_disconnect": "true"
