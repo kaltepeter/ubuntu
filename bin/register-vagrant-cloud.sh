@@ -11,7 +11,7 @@ usage() {
     echo
     echo "Requires the following environment variables to be set:"
     echo "  VAGRANT_CLOUD_USERNAME"
-    echo "  VAGRANT_CLOUD_ACCESS_TOKEN"
+    echo "  VAGRANT_CLOUD_TOKEN"
 #    echo "  BOX_CUTTER_ATLAS_USERNAME"
 #    echo "  BOX_CUTTER_ATLAS_ACCESS_TOKEN"
 }
@@ -26,8 +26,8 @@ args() {
         echo "VAGRANT_CLOUD_USERNAME environment variable not set!"
         usage
         exit 1
-    elif [ -z ${VAGRANT_CLOUD_ACCESS_TOKEN+x} ]; then
-        echo "VAGRANT_CLOUD_ACCESS_TOKEN environment variable not set!"
+    elif [ -z ${VAGRANT_CLOUD_TOKEN+x} ]; then
+        echo "VAGRANT_CLOUD_TOKEN environment variable not set!"
         usage
         exit 1
 #    elif [ -z ${BOX_CUTTER_ATLAS_USERNAME+x} ]; then
@@ -208,15 +208,33 @@ publish_provider() {
     vagrant_cloud_access_token=$2
 
     echo "==> Checking to see if ${PROVIDER} provider exists"
-    HTTP_STATUS=$(curl -s -f -o /dev/null -w "%{http_code}" -i "${VAGRANT_CLOUD_URL}/box/${vagrant_cloud_username}/${BOX_NAME}/version/${VERSION}/provider/${PROVIDER}"?access_token="${vagrant_cloud_access_token}" || true)
+    HTTP_STATUS=$(curl -s -f -o /dev/null -w "%{http_code}" -i --header "Authorization: Bearer $VAGRANT_CLOUD_TOKEN" \
+ 		"${VAGRANT_CLOUD_URL}/box/${vagrant_cloud_username}/${BOX_NAME}/version/${VERSION}/provider/${PROVIDER}"|| true)
     echo ${HTTP_STATUS}
     if [ 200 -eq ${HTTP_STATUS} ]; then
         echo "==> Updating ${PROVIDER} provider"
-        curl -X PUT "${VAGRANT_CLOUD_URL}/box/${vagrant_cloud_username}/${BOX_NAME}/version/${VERSION}/provider/${PROVIDER}" -d "access_token=${vagrant_cloud_access_token}" -d provider[name]="${PROVIDER}" -d provider[url]="${PROVIDER_URL}"
+        curl --header "Authorization: Bearer $VAGRANT_CLOUD_TOKEN" \
+ 			-X PUT "${VAGRANT_CLOUD_URL}/box/${vagrant_cloud_username}/${BOX_NAME}/version/${VERSION}/provider/${PROVIDER}" -d provider[name]="${PROVIDER}"
     else
         echo "==> Creating ${PROVIDER} provider"
-        curl -X POST "${VAGRANT_CLOUD_URL}/box/${vagrant_cloud_username}/${BOX_NAME}/version/${VERSION}/providers" -d "access_token=${vagrant_cloud_access_token}" -d provider[name]="${PROVIDER}" -d provider[url]="${PROVIDER_URL}"
+        curl --header "Authorization: Bearer $VAGRANT_CLOUD_TOKEN" \
+			-X POST "${VAGRANT_CLOUD_URL}/box/${vagrant_cloud_username}/${BOX_NAME}/version/${VERSION}/providers" -d provider[name]="${PROVIDER}"
     fi
+    upload_provider
+}
+
+upload_provider() {
+	provider_url="${VAGRANT_CLOUD_URL}/box/${VAGRANT_CLOUD_USERNAME}/${BOX_NAME}/version/${VERSION}/provider/${PROVIDER}/upload"
+	echo ${provider_url}
+	response=$(curl \
+	  --header "Authorization: Bearer $VAGRANT_CLOUD_TOKEN" \
+	  "${provider_url}")
+
+	# Requires the jq command
+	upload_path=$(echo "$response" | jq --raw-output .upload_path)
+	echo "upload_path: ${upload_path}"
+
+	curl --request PUT --upload-file ${PROVIDER_FILE} $upload_path > upload.log
 }
 
 atlas_publish() {
@@ -257,17 +275,17 @@ atlas_publish() {
 #    BOXCUTTER_BASE_URL=http://cdn.boxcutter.io/ubuntu
     if [[ -e ${VMWARE_BOX_FILE} ]]; then
         PROVIDER=vmware_desktop
-        PROVIDER_URL=${VAGRANT_CLOUD_URL}/vmware${VMWARE_VERSION}/${BOX_NAME}${BOX_SUFFIX}
+        PROVIDER_FILE=${VMWARE_BOX_FILE}
         publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
     fi
     if [[ -e ${VIRTUALBOX_BOX_FILE} ]]; then
         PROVIDER=virtualbox
-        PROVIDER_URL=${VAGRANT_CLOUD_URL}/virtualbox${VIRTUALBOX_VERSION}/${BOX_NAME}${BOX_SUFFIX}
+        PROVIDER_FILE=${VIRTUALBOX_BOX_FILE}
         publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
     fi
     if [[ -e ${PARALLELS_BOX_FILE} ]]; then
         PROVIDER=parallels
-        PROVIDER_URL=${VAGRANT_CLOUD_URL}/parallels${PARALLELS_VERSION}/${BOX_NAME}${BOX_SUFFIX}
+        PROVIDER_FILE=${PARALLELS_BOX_FILE}
         publish_provider ${vagrant_cloud_username} ${vagrant_cloud_access_token}
     fi
 
@@ -289,7 +307,7 @@ atlas_publish() {
 main() {
     args "$@"
 #    atlas_publish ${BOX_CUTTER_ATLAS_USERNAME} ${BOX_CUTTER_ATLAS_ACCESS_TOKEN}
-    atlas_publish ${VAGRANT_CLOUD_USERNAME} ${VAGRANT_CLOUD_ACCESS_TOKEN}
+    atlas_publish ${VAGRANT_CLOUD_USERNAME} ${VAGRANT_CLOUD_TOKEN}
 }
 
 main "$@"
