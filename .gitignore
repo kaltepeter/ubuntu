@@ -2,3 +2,4 @@
 box
 .vagrant
 packer_cache
+upload.log
