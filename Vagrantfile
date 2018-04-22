@@ -10,7 +10,7 @@
 Vagrant.configure("2") do |config|
   config.vm.define :jaasslavehost, primary: true do |jaasslavehost|
     jaasslavehost.vm.box = "kaltepeter/jaasslavehost"
-    jaasslavehost.vm.box_version = "1.0.6"
+    jaasslavehost.vm.box_version = "1.0.7"
     jaasslavehost.vm.hostname = "jaasslavehost"
     jaasslavehost.vm.box_check_update = true
 
