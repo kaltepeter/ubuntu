@@ -1,5 +1,7 @@
 # Packer templates for Ubuntu
 
+[![CircleCI](https://circleci.com/gh/kaltepeter/ubuntu/tree/master.svg?style=svg)](https://circleci.com/gh/kaltepeter/ubuntu/tree/master)
+
 ### Overview
 
 This repository contains [Packer](https://packer.io/) templates for creating Ubuntu Vagrant boxes.

@@ -1,0 +1,63 @@
+version: 2
+jobs:
+  build-docker:
+    docker:
+      - image: docker:18.09
+    environment:
+      TAG: 1.0.1
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       apk add --no-cache \
+      #         py-pip=9.0.0-r1
+      #       pip install \
+      #         docker-compose==1.12.0 \
+      #         awscli==1.11.76
+      - run:
+          name: Build and push Docker image
+          command: |
+            docker build -t kaltepeter/$IMAGE_NAME:$TAG ./.circleci/images
+            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+            docker push kaltepeter/$IMAGE_NAME:$TAG
+  validate:
+    docker:
+      - image: kaltepeter/$IMAGE_NAME:$TAG
+    environment:
+      TAG: 1.0.1
+    working_directory: ~/packer
+    steps:
+      - checkout
+      - run:
+          name: Validate base
+          command: packer validate -var-file=ubuntu1804.json ./ubuntu.json
+  build-ubuntu1804:
+    docker:
+      - image: kaltepeter/$IMAGE_NAME:$TAG
+    environment:
+      TAG: 1.0.1
+    working_directory: ~/packer
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/packer
+      - run:
+          name: Build ubuntu1804
+          command: packer build -only=virtualbox-iso -var-file=ubuntu1804.json ubuntu.json
+      - store_artifacts:
+          path: manifest-ubuntu1804.json
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build-docker
+      - validate:
+          requires:
+            - build-docker
+      - build-ubuntu1804:
+          requires:
+            - validate
+            - build-docker
